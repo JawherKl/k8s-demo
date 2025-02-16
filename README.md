@@ -1,8 +1,6 @@
 # Kubernetes Demo Project
 
-This repository contains a demonstration of deploying and managing applications using **Kubernetes (k8s)**. It is designed to help users understand the basics of Kubernetes, including deployments, services, scaling, and other core concepts.
-
-Whether you're new to Kubernetes or looking for a practical example to experiment with, this project provides a hands-on approach to working with k8s.
+This repository contains a demonstration of deploying and managing applications using **Kubernetes (k8s)**. It is designed to help users understand the basics of Kubernetes, including deployments, services, scaling, and other core concepts. Whether you're new to Kubernetes or looking for a practical example to experiment with, this project provides a hands-on approach to working with k8s.
 
 ---
 
