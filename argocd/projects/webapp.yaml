@@ -1,0 +1,108 @@
+---
+# ArgoCD Project Definition
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: webapp-project
+  namespace: argocd
+spec:
+  description: "Web Application Project with MongoDB"
+  sourceRepos:
+    - '*'  # Allows any repository
+  destinations:
+    - namespace: development
+      server: https://kubernetes.default.svc
+    - namespace: staging
+      server: https://kubernetes.default.svc
+    - namespace: production
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+---
+# Development Environment Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp-dev
+  namespace: argocd
+spec:
+  project: webapp-project
+  source:
+    repoURL: https://github.com/JawherKl/k8s-demo.git  # Replace with your repo
+    targetRevision: HEAD
+    path: helm/webapp
+    helm:
+      valueFiles:
+        - values-dev.yaml
+      parameters:
+        - name: environment
+          value: development
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: development
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+# Staging Environment Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp-staging
+  namespace: argocd
+spec:
+  project: webapp-project
+  source:
+    repoURL: https://github.com/JawherKl/k8s-demo.git  # Replace with your repo
+    targetRevision: HEAD
+    path: helm/webapp
+    helm:
+      valueFiles:
+        - values-staging.yaml
+      parameters:
+        - name: environment
+          value: staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+# Production Environment Application
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webapp-prod
+  namespace: argocd
+spec:
+  project: webapp-project
+  source:
+    repoURL: https://github.com/JawherKl/k8s-demo.git  # Replace with your repo
+    targetRevision: HEAD
+    path: helm/webapp
+    helm:
+      valueFiles:
+        - values-prod.yaml
+      parameters:
+        - name: environment
+          value: production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: false  # Disable auto-pruning for production
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

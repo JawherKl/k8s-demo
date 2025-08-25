@@ -1,0 +1,34 @@
+name: Deploy to Kubernetes
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: '3.8.0'
+
+    - name: Deploy to ArgoCD
+      env:
+        ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+      run: |
+        curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+        rm argocd-linux-amd64
+        argocd app create webapp-dev \
+          --repo https://github.com/${{ github.repository }} \
+          --path helm/webapp \
+          --dest-server https://kubernetes.default.svc \
+          --dest-namespace development \
+          --helm-chart webapp \
+          --values values-dev.yaml \
+          --upsert

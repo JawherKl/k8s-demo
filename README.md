@@ -26,6 +26,9 @@ This project demonstrates how to:
 - Scale the application using ReplicaSets.
 - Manage configurations using ConfigMaps and Secrets.
 - Clean up resources after deployment.
+- Implement GitOps practices using ArgoCD
+- Manage multiple environments (dev, staging, prod)
+- Automate deployments using Helm charts
 
 The demo application is a simple web server that serves a static webpage or API endpoint.
 
@@ -69,12 +72,20 @@ Before you begin, ensure you have the following installed:
 k8s-demo/
 ├── manifests/               # Kubernetes YAML files
 │   ├── deployment.yaml      # Deployment configuration
-│   ├── service.yaml         # Service configuration
-│   ├── configmap.yaml       # ConfigMap for environment variables
-│   └── ...                 # Other Kubernetes resources
-├── src/                     # Application source code (if applicable)
-├── Dockerfile               # Dockerfile for building the application image
-└── README.md                # This file
+│   ├── service.yaml        # Service configuration
+│   └── configmap.yaml      # ConfigMap for environment variables
+├── helm/                   # Helm chart directory
+│   └── webapp/            
+│       ├── Chart.yaml      # Helm chart definition
+│       ├── values.yaml     # Default values
+│       ├── values-dev.yaml # Development values
+│       └── templates/      # Helm templates
+├── argocd/                 # ArgoCD configurations
+│   └── projects/
+│       └── webapp.yaml     # ArgoCD application definitions
+├── src/                    # Application source code
+├── Dockerfile              # Dockerfile for the application
+└── README.md              # This file
 ```
 
 ---
@@ -128,6 +139,164 @@ To delete the deployed resources:
 ```bash
 kubectl delete -f manifests/
 ```
+
+---
+
+## Helm Implementation
+
+This project uses Helm for package management and deployment. The Helm chart structure is organized as follows:
+
+### Chart Structure
+```
+helm/webapp/
+├── Chart.yaml          # Chart metadata
+├── values.yaml         # Default values
+├── values-dev.yaml     # Development values
+├── values-staging.yaml # Staging values
+├── values-prod.yaml    # Production values
+└── templates/          # Helm templates
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── configmap.yaml
+    ├── secret.yaml
+    ├── hpa.yaml
+    └── _helpers.tpl
+```
+
+### Installation and Usage
+
+1. Install Helm (if not already installed):
+   ```bash
+   curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+   ```
+
+2. Add dependencies:
+   ```bash
+   helm repo add bitnami https://charts.bitnami.com/bitnami
+   helm repo update
+   ```
+
+3. Deploy to different environments:
+   ```bash
+   # Development
+   helm install webapp-dev ./helm/webapp -f helm/webapp/values-dev.yaml -n development
+
+   # Staging
+   helm install webapp-staging ./helm/webapp -f helm/webapp/values-staging.yaml -n staging
+
+   # Production
+   helm install webapp-prod ./helm/webapp -f helm/webapp/values-prod.yaml -n production
+   ```
+
+### Configuration Options
+
+Key configurations available in values files:
+
+```yaml
+webapp:
+  replicaCount: 1
+  image:
+    repository: nanajanashia/k8s-demo-app
+    tag: v1.0
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30100
+
+mongodb:
+  enabled: true
+  auth:
+    rootPassword: mongopassword
+    username: mongouser
+    password: mongopassword
+```
+
+### Upgrading and Rolling Back
+
+- Upgrade a release:
+  ```bash
+  helm upgrade webapp-dev ./helm/webapp -f helm/webapp/values-dev.yaml -n development
+  ```
+
+- Roll back to a previous release:
+  ```bash
+  # List release history
+  helm history webapp-dev -n development
+
+  # Roll back to a specific revision
+  helm rollback webapp-dev 1 -n development
+  ```
+
+### Helm Commands Reference
+
+```bash
+# Validate chart
+helm lint ./helm/webapp
+
+# See what will be installed
+helm template webapp-dev ./helm/webapp -f values-dev.yaml
+
+# List installed releases
+helm list -n development
+
+# Uninstall a release
+helm uninstall webapp-dev -n development
+```
+
+---
+
+## GitOps Implementation
+
+This project uses ArgoCD for GitOps-based deployments. The setup includes:
+
+1. Install ArgoCD:
+   ```bash
+   kubectl create namespace argocd
+   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   ```
+
+2. Access ArgoCD UI:
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   ```
+   Get the initial admin password:
+   ```bash
+   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+   ```
+
+3. Deploy Applications:
+   ```bash
+   kubectl apply -f argocd/projects/webapp.yaml
+   ```
+
+### Environment Management
+
+The project supports three environments:
+- **Development**: Automatic sync with pruning enabled
+- **Staging**: Automatic sync with pruning enabled
+- **Production**: Manual sync for safety
+
+Each environment is configured in:
+- `helm/webapp/values-{env}.yaml`: Environment-specific configurations
+- `argocd/projects/webapp.yaml`: ArgoCD application definitions
+
+### GitOps Workflow
+
+1. Make changes to the Helm chart or values
+2. Commit and push to the repository
+3. ArgoCD automatically detects changes
+4. Changes are applied based on environment sync policies
 
 ---
 
