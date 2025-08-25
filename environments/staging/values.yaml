@@ -1,0 +1,52 @@
+webapp:
+  name: webapp
+  image:
+    repository: nanajanashia/k8s-demo-app
+    tag: v1.0
+    pullPolicy: IfNotPresent
+  
+  replicaCount: 1
+  
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30100
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+mongodb:
+  enabled: true
+  auth:
+    rootPassword: mongopassword
+    username: mongouser
+    password: mongopassword
+    database: webapp-db
