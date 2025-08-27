@@ -1,0 +1,32 @@
+clusterName: "elasticsearch"
+nodeGroup: "master"
+
+# Reduce resource requirements
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+# Single node setup for development
+replicas: 1
+minimumMasterNodes: 1
+
+# Reduce storage requirements
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+
+# Disable security features for development
+security:
+  enabled: false
+
+# Configure for single node
+node:
+  master: true
+  data: true
+  ingest: true
