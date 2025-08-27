@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: webapp-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: webapp.alerts
+    rules:
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{status=~"5.."}[5m]) > 1
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: High error rate detected
+        description: "Error rate is {{ $value }} per second for last 5 minutes"
+    
+    - alert: HighLatency
+      expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m]) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: High latency detected
+        description: "Latency is {{ $value }}s for last 5 minutes"

@@ -36,6 +36,17 @@ ingress:
           pathType: ImplementationSpecific
   tls: []
 
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+  grafana:
+    dashboards:
+      enabled: true
+  alerts:
+    enabled: true
+
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -50,3 +61,17 @@ mongodb:
     username: mongouser
     password: mongopassword
     database: webapp-db
+
+elasticsearchHosts: "http://elasticsearch-master:9200"
+
+service:
+  type: LoadBalancer
+  port: 5601
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "500Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
