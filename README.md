@@ -1,5 +1,14 @@
 # Kubernetes Demo Project
 
+![Repository Size](https://img.shields.io/github/repo-size/JawherKl/k8s-demo)
+![Last Commit](https://img.shields.io/github/last-commit/JawherKl/k8s-demo)
+![Issues](https://img.shields.io/github/issues-raw/JawherKl/k8s-demo)
+![Forks](https://img.shields.io/github/forks/JawherKl/k8s-demo)
+![Stars](https://img.shields.io/github/stars/JawherKl/k8s-demo)
+
+![nodepost](https://github.com/JawherKl/k8s-demo/blob/main/kubernetes.jpg?raw=true)
+
+## ✨ Overview
 This repository contains a demonstration of deploying and managing applications using **Kubernetes (k8s)**. It is designed to help users understand the basics of Kubernetes, including deployments, services, scaling, and other core concepts. Whether you're new to Kubernetes or looking for a practical example to experiment with, this project provides a hands-on approach to working with k8s.
 
 ---
