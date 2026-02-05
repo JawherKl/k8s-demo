@@ -13,7 +13,7 @@ filebeatConfig:
             matchers:
             - logs_path:
                 logs_path: "/var/log/containers/"
-    
+
     output.elasticsearch:
       hosts: ['${ELASTICSEARCH_HOST:elasticsearch-master}:${ELASTICSEARCH_PORT:9200}']
       username: ${ELASTICSEARCH_USERNAME}
